@@ -73,7 +73,6 @@ class GraphTSP(GraphXY):
             if os.path.exists(optfile):
                 with gzip.open(optfile, 'rt') as f:
                     opt = tsplib95.parse(f.read())
-                    print (name, type(opt.tours))
             else:
                 opt = None
 

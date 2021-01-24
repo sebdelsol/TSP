@@ -1,7 +1,6 @@
 # coding: utf-8
 # pylint: disable=missing-docstring, invalid-name
 
-
 from multiprocessing import Lock
 
 class Log:

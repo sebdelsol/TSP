@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=missing-docstring, invalid-name
+# pylint: disable=missing-docstring, invalid-name, fixme
 
 # biblio
 # inspired by https://github.com/rochakgupta/aco-tsp
@@ -15,16 +15,14 @@
 # conda activate ox
 # pip install tsplib95
 
-# TODO
+# todo
 # better scale
 # better termination ?
 # case when pos = 0 or pos = one value of the array ????
 # openCL
-# several files & remove __import__ in classes
 # MinMax with alternation of localBest to globalBest
 # matplotlib in html with folium
 # opt2
-# pharmacy
 # ATSP
 # save best run parameters
 

@@ -5,3 +5,4 @@
 /TSPLIB
 /_TSPLIB
 /__pycache__
+.gitignore

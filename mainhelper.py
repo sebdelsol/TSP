@@ -41,7 +41,6 @@ def get_defaults(func):
         if val is not inspect.Parameter.empty:
             yield key, to_str(val)
 
-
 def print_defaults(txt, func, override = None):
     key_val = get_defaults(func)
 
@@ -54,7 +53,6 @@ def print_defaults(txt, func, override = None):
     txt = TAB + txt + 'dict('
     sep = ',\n' + f'{" " * len(txt)}'
     print (txt + sep.join(args) + ')')
-
 
 # main code helper
 def copy_paste_helper():

@@ -1,7 +1,6 @@
 # coding: utf-8
 # pylint: disable=missing-docstring, invalid-name, attribute-defined-outside-init, no-member
 
-
 import math
 import os
 import pickle

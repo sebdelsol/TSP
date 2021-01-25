@@ -213,7 +213,7 @@ class ACO:
 
         return False
 
-    def plot_lengthby_step(self):
+    def plot_length_by_step(self):
         title = r'$\bf{%sAS}$, $Ratio_{explored} =' %self.name
         title += r'\frac{%g\cdot10^{3}\/\it{tours}}' % (self.nStep * self.nAnts * .001)
 
@@ -302,7 +302,7 @@ class ACO:
 
         # plot best length per step
         plt.subplot(self.gs[1])
-        self.plot_lengthby_step()
+        self.plot_length_by_step()
 
         # draw & wait key
         log ('hit a key (Esc to exit)')

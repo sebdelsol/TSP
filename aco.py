@@ -32,7 +32,6 @@ class MonoDummyPool:
     def join(self):
         pass
 
-
 # Ant Colony Optimization class for simulation
 class ACO:
 
@@ -150,7 +149,8 @@ class ACO:
             if self.movingAvg[step] - self.movingAvg[step-1] == 0:
                 self.nStagnations += 1
 
-    def simulate(self, nStep=200, alpha=1.0, beta=3.0, rho=.1, tau=1.0, q=.6,
+    def simulate(self, nStep=200, alpha=1.0,
+                 beta=3.0, rho=.1, tau=1.0, q=.6,
                  nAvg=10, termination = True):
 
         log (f'simulate {nStep} steps')
@@ -189,13 +189,10 @@ class ACO:
         for step in range(nStep):
             self.doStep(step)
 
-            if self.nStagnations >= nStep // 10 :
-                if termination:
-                    log (f'termination @ {step} steps')
-                    self.nStep = step + 1
-                    break
-                log (f'continue @ {step} steps')
-                self.nStagnations = -nStep
+            if termination and self.nStagnations >= nStep // 10 :
+                log (f'termination @ {step} steps')
+                self.nStep = step + 1
+                break
         else:
             if termination:
                 log (f'done, stagnations={self.nStagnations}')
@@ -203,18 +200,18 @@ class ACO:
         # clean first false terms of movingAvg
         self.movingAvg[: self.nAvg] = self.movingAvg[self.nAvg + 1]
 
-        # simulate again ?
-        if self.doProfile:
-            self.nProfile -= 1
-            return  self.nProfile > 0
-
-        elif self.doPlot:
-            keepgoing = self.plot()
-
         # save best Tour
         self.graph.saveBestFound(self.bestGlobalTour)
 
-        return keepgoing
+        # simulate again ?
+        if self.doProfile:
+            self.nProfile -= 1
+            return self.nProfile > 0
+
+        elif self.doPlot:
+            return self.plot()
+
+        return False
 
     def plotLengthByStep(self):
         title = r'$\bf{%sAS}$, $Ratio_{explored} =' %self.name
@@ -285,7 +282,7 @@ class ACO:
     def initPlot(self):
         # layout
         self.fig = plt.figure('ACO', figsize=(15, 5))
-        self.gs = gridspec.GridSpec(1, 2, width_ratios=[1, 1.5], left=.025, right=1-.025, top= .85)
+        self.gs = gridspec.GridSpec(1, 2, width_ratios=[1, 1.5], left=.025, right=.975, top=.85)
 
         # callback to catch hit keys on the figure window
         self.key = None
@@ -315,7 +312,6 @@ class ACO:
         # Esc key means exit
         return self.key != 'escape'
 
-
 # Elitist AS strategy
 class Elitist(ACO):
     name = 'Elitist'
@@ -327,7 +323,6 @@ class Elitist(ACO):
 
         # best global tour add phero
         self.bestGlobalTour.addPhero(self.tau)
-
 
 # Rank AS strategy
 class Rank(ACO):
@@ -345,7 +340,6 @@ class Rank(ACO):
         # the better the rank, the more the ant add phero
         for i in range(keep):
             tours[i].addPhero(self.tau * (keep - i))
-
 
 # MaxMin AS strategy
 class MaxMin(ACO):

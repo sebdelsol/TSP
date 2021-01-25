@@ -52,11 +52,11 @@ class Tour:
         return self.length != np.Inf
 
     @staticmethod
-    def initGraph(graph):
+    def init_graph(graph):
         Tour.graph = graph
 
-    def addPhero(self, delta):
-        Tour.graph.addPheroPath(self.path, delta / self.length)
+    def add_phero(self, delta):
+        Tour.graph.add_phero_path(self.path, delta / self.length)
 
 
 # symmetric graph to solve TSP
@@ -71,7 +71,7 @@ class Graph:
         self.nNodes = nNodes
 
         # names
-        self.getNames()
+        self.get_names()
         log (f'{self.pname} created with {nNodes} nodes')
 
         # how many permutations for this TSP ?
@@ -93,7 +93,7 @@ class Graph:
         self.matWeight = self.sharedMatWeight.get()
 
         # get matDist
-        matDist = self.getMatDist()
+        matDist = self.get_mat_dist()
 
         # fill diagonal with +infinity to avoid /0 in visibility computation
         np.fill_diagonal(matDist, np.Inf)
@@ -102,19 +102,19 @@ class Graph:
         self.sharedMatDist.update(matDist)
 
         # best found tour
-        self.loadBestFound()
+        self.load_best_found()
 
     # init pheros on the whole graph
-    def initPhero(self, phero):
+    def init_phero(self, phero):
         self.matPhero = np.full(self.matShape, phero) # diagonal is not used
 
     # init visibility on the whole graph
-    def initVisib(self, beta):
+    def init_visibility(self, beta):
         self.matVisib = (1. / self.matDist) # avoid \0 by having matDist diagonal filled with np.Inf
         self.matVisib **= beta
 
     # compute weight for each edge
-    def computeWeights(self, alpha):
+    def compute_weights(self, alpha):
         matWeight = self.matPhero ** alpha
         matWeight *= self.matVisib
 
@@ -130,7 +130,7 @@ class Graph:
         self.matPhero.clip(minPhero, maxPhero, out = self.matPhero)
 
     # add phero on the edges of a path
-    def addPheroPath(self, path, delta):
+    def add_phero_path(self, path, delta):
         rows, cols = path[:-1], path[1:]
         self.matPhero[rows, cols] += delta
 
@@ -138,7 +138,7 @@ class Graph:
         self.matPhero[cols, rows] += delta
 
     # don't need to save if already an optimal tour
-    def loadBestFound(self):
+    def load_best_found(self):
         if not os.path.exists(self.bestdir):
             os.makedirs(self.bestdir)
 
@@ -150,7 +150,7 @@ class Graph:
                 log (f'best found tour so far is {self.bestFoundTour.length}km')
 
     # don't need to save if already an optimal tour
-    def saveBestFound(self, found):
+    def save_best_found(self, found):
         if self.optTour is None:
             if found.length < self.bestFoundTour.length:
                 self.bestFoundTour = Tour(found)
@@ -166,16 +166,16 @@ class GraphXY(Graph):
         self.nNodes = nNodes
 
         # nodes coords in a xmax * ymax plane
-        self.Xs, self.Ys = self.getNodes()
+        self.Xs, self.Ys = self.get_nodes()
 
         # bbox and labels for plotting
         self.bbox = (self.Xs.min(), self.Ys.min(), self.Xs.max(), self.Ys.max())
-        self.nodeLabels = self.getNodeLabels()
+        self.nodeLabels = self.get_node_labels()
 
         super(GraphXY, self).__init__(nNodes)
 
     # plot a tour
-    def plotTour(self, tour):
+    def plot_tour(self, tour):
         bbox = self.bbox
         ax, _ = plt.gca(), plt.gcf()
 
@@ -244,20 +244,20 @@ class GraphXY(Graph):
             txt += r' i.e. $\it%s$ $\bf%+g$%%' %(bestTxt, bestLength)
             title += '\n'
 
-        self.plotPath(tour.path, '-g.', 'blue', txt, annotateNodes = True)
+        self.plot_path(tour.path, '-g.', 'blue', txt, annotateNodes = True)
         plt.title(title)
 
         # plot bestTour
         if bestTour:
             label = r'$%s=%gkm$'%(bestTxt, bestTour.length)
-            self.plotPath(bestTour.path, '--', '.6', label, w*.01, h*.01)
+            self.plot_path(bestTour.path, '--', '.6', label, w*.01, h*.01)
 
         # show legend
         plt.legend(bbox_to_anchor=(0.5, 1), loc='lower center', borderaxespad=0.,
                    ncol = 1 if bestTour else 1, frameon = False, labelspacing= 0)
 
     # plot all edges of a path
-    def plotPath(self, path, linestyle, color, label, dx = 0, dy = 0, annotateNodes = False):
+    def plot_path(self, path, linestyle, color, label, dx = 0, dy = 0, annotateNodes = False):
         # plot nodes edges
         Xpath, Ypath = self.Xs[path], self.Ys[path]
         if dx > .0:
@@ -282,16 +282,16 @@ class GraphRND(GraphXY):
         self.xmax, self.ymax = xmax, ymax
         super(GraphRND, self).__init__(nNodes)
 
-    def getNames(self):
+    def get_names(self):
         self.pname = f'RndSeed_{self.seed}_{self.nNodes}'           # for print
         self.name = r'RndSeed_{%d, %d}'%(self.seed, self.nNodes)    # for matplotlib
         self.fname = self.pname + f'_({self.xmax}, {self.ymax})'    # for file
 
-    def getNodeLabels(self):
+    def get_node_labels(self):
         return np.array([i+1 for i in range(self.nNodes)])
 
     # get random nodes Xs & Ys in a xmax * ymax plane
-    def getNodes(self):
+    def get_nodes(self):
         # same seed gives the same graph
         np.random.seed(self.seed)
 
@@ -304,7 +304,7 @@ class GraphRND(GraphXY):
         return  X, Y
 
     # get mat distance on the whole graph
-    def getMatDist(self):
+    def get_mat_dist(self):
         # vector of complex nodes coords reshaped as an 1 * nNodes matrix so we can transpose it
         coords = (self.Xs + self.Ys * 1j)[np.newaxis]
 

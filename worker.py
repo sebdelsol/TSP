@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=missing-docstring, invalid-name, global-variable-undefined
+# pylint: disable=missing-docstring, global-variable-undefined
 
 from random import random
 from bisect import bisect

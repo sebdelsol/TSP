@@ -19,23 +19,23 @@ class GraphTSP(GraphXY):
     TSPurl = 'http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/tsp/ALL_tsp.tar.gz'
 
     def __init__(self, tspname = 'eil51'):
-        self.tsp, self.opt, nNodes = GraphTSP.getTSP(tspname)
+        self.tsp, self.opt, nNodes = GraphTSP.get_tsp(tspname)
 
         if self.tsp:
             self.tspname = tspname
-            self.optTour = self.loadOptTour()
+            self.optTour = self.get_opt_tour()
             super(GraphTSP, self).__init__(nNodes)
 
         else:
             self.isvalid = False
 
-    def getNames(self):
+    def get_names(self):
         nameWoDigit = re.split(r'([\d]+)', self.tspname)[0]
         self.name = r'{%s_{%d}}' %(nameWoDigit.capitalize(), self.nNodes)   # for print
         self.pname = f'{self.tspname}'                                      # for matplotlib
         self.fname = self.pname                                             # for file
 
-    def loadOptTour(self):
+    def get_opt_tour(self):
         if self.opt:
             toindex = dict((n, i) for i, n in enumerate(self.tsp.get_nodes()))
             path = [toindex[n] for n in self.opt.tours[0]]
@@ -47,21 +47,21 @@ class GraphTSP(GraphXY):
 
         return None
 
-    def getNodeLabels(self):
+    def get_node_labels(self):
         return np.fromiter(self.tsp.get_nodes(), int)
 
     # get all nodes Xs & Ys
-    def getNodes(self):
+    def get_nodes(self):
         XY = np.array([self.tsp.get_display(n) for n in self.tsp.get_nodes()], dtype='d')
         return XY[:, 0], XY[:, 1] #Xs & Ys are the first & second column
 
-    def getMatDist(self):
+    def get_mat_dist(self):
         nx = __import__('networkx')
         return nx.to_numpy_matrix(self.tsp.get_graph())
 
     # load a TSP file from TSPLIB
     @staticmethod
-    def getTSP(name):
+    def get_tsp(name):
         tspdir = GraphTSP.TSPdir
         tspfile = os.path.join(tspdir, f'{name}.tsp.gz')
         optfile = os.path.join(tspdir, f'{name}.opt.tour.gz')
@@ -97,12 +97,12 @@ class GraphTSP(GraphXY):
 
     # get a dict of valid TSPs in TSPLIB
     @staticmethod
-    def getAllValidTsp(forceupdate = False):
+    def get_all_valid_tsp(forceupdate = False):
         tspdir = GraphTSP.TSPdir
 
         # create tspdir & download if tspdir doesn't exist
-        if GraphTSP.createTSPdir():
-            GraphTSP.dlTSP()
+        if GraphTSP.create_tsp_dir():
+            GraphTSP.download_tsp()
 
         # file to store the 'state' of tspdir to trck its change
         tspchgfile = os.path.join(tspdir, f'{tspdir}.tspchg')
@@ -140,7 +140,7 @@ class GraphTSP(GraphXY):
             for fname in os.listdir(tspdir):
                 if '.tsp.' in fname and fname.endswith('.gz'):
                     tspname = fname.split('.')[0]
-                    tsp, opt, nodes = GraphTSP.getTSP(tspname)
+                    tsp, opt, nodes = GraphTSP.get_tsp(tspname)
                     if tsp:
                         tsps[tspname] = {'nodes': nodes, 'opt': opt is not None}
 
@@ -160,7 +160,7 @@ class GraphTSP(GraphXY):
 
     # create TSPdir if it doesn't exist
     @staticmethod
-    def createTSPdir():
+    def create_tsp_dir():
         tspdir = GraphTSP.TSPdir
 
         # create tspdir if it doesn't exist
@@ -172,7 +172,7 @@ class GraphTSP(GraphXY):
 
     # download all TSP
     @staticmethod
-    def dlTSP():
+    def download_tsp():
         log ('download all TSP')
 
         requests = __import__('requests')
@@ -191,6 +191,6 @@ class GraphTSP(GraphXY):
 
 
 if __name__ == '__main__':
-    GraphTSP.createTSPdir()
-    GraphTSP.dlTSP()
-    GraphTSP.getAllValidTsp()
+    GraphTSP.create_tsp_dir()
+    GraphTSP.download_tsp()
+    GraphTSP.get_all_valid_tsp()

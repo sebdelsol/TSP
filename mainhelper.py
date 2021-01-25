@@ -6,8 +6,8 @@ import inspect
 from log import log
 from aco import ACO
 from graph import Graph, GraphRND
-from graphTsp import GraphTSP
-from graphMap import GraphMAP
+from graphtsp import GraphTSP
+from graphmap import GraphMAP
 
 # tools
 TAB = ' ' * 4
@@ -92,7 +92,7 @@ def copy_paste_helper():
 
 
 # list of TSP, Graph and ACO to choose from
-_, TspOpts = GraphTSP.getAllValidTsp()
+_, TspOpts = GraphTSP.get_all_valid_tsp()
 GraphClasses = list(get_leaves_cls(Graph))
 AcoClasses   = ACO.__subclasses__()
 

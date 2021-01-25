@@ -20,11 +20,11 @@ class MonoDummyPool:
     def __init__(self, initargs = None, initializer = None):
         initializer(*initargs)
 
-    def map(self, func, listOfArgs, _):
-        return (func(args) for args in listOfArgs)
+    def map(self, func, args, _):
+        return (func(args) for args in args)
 
-    def starmap(self, func, listOfArgs, _):
-        return (func(*args) for args in listOfArgs)
+    def starmap(self, func, args, _):
+        return (func(*args) for args in args)
 
     def close(self):
         pass
@@ -59,7 +59,7 @@ class ACO:
 
         # create an array of tours for each ant to avoid a class instance creation each step
         self.tours = [Tour() for _ in range(nAnts)]
-        Tour.initGraph(graph) # class attribute of Tour
+        Tour.init_graph(graph) # class attribute of Tour
 
         # if not multiprocess use MonoDummyPool as a mono processor pool for debug
         createPool = Pool if multiprocess else MonoDummyPool
@@ -91,14 +91,14 @@ class ACO:
         self.doPlot = doPlot and not self.doProfile
 
         if self.doPlot:
-            self.initPlot()
+            self.init_plot()
 
         if self.doProfile:
-            self.initProfiler()
+            self.init_profiler()
 
     def close(self):
         if self.doProfile:
-            self.closeProfiler()
+            self.close_profiler()
 
         if self.doPlot:
             plt.close()
@@ -107,12 +107,12 @@ class ACO:
         self.pool.join()
 
     # see child classes
-    def addPheroThisStep(self, bestTour, step):
+    def add_phero_this_step(self, bestTour, step):
         pass
 
-    def doStep(self, step):
+    def do_step(self, step):
         # compute weights on all edges only once a step
-        self.graph.computeWeights(self.alpha)
+        self.graph.compute_weights(self.alpha)
 
         # do a tour for each ant, use the workers poll
         lengths = self.pool.starmap(WorkerAntDoTour, self.ants, self.chunksize)
@@ -134,7 +134,7 @@ class ACO:
             self.bestTourStep = step
 
         # add pheromone for this step, the actual function called depends on the ACO subclass used
-        self.addPheroThisStep(bestTour, step)
+        self.add_phero_this_step(bestTour, step)
 
         # evaporate pheromone on all edges
         self.graph.evaporate(1. - self.rho)
@@ -167,10 +167,10 @@ class ACO:
         self.ants = [(i, start, q) for i, start in enumerate(self.starts)]
 
         # init phero on all edges of the graph
-        self.graph.initPhero(tau)
+        self.graph.init_phero(tau)
 
         # init visibility on all edges of the graph
-        self.graph.initVisib(beta)
+        self.graph.init_visibility(beta)
 
         # best tours
         self.bestGlobalTour = Tour() # tour.length = np.Inf
@@ -187,7 +187,7 @@ class ACO:
 
         # simulate nStep
         for step in range(nStep):
-            self.doStep(step)
+            self.do_step(step)
 
             if termination and self.nStagnations >= nStep // 10 :
                 log (f'termination @ {step} steps')
@@ -201,7 +201,7 @@ class ACO:
         self.movingAvg[: self.nAvg] = self.movingAvg[self.nAvg + 1]
 
         # save best Tour
-        self.graph.saveBestFound(self.bestGlobalTour)
+        self.graph.save_best_found(self.bestGlobalTour)
 
         # simulate again ?
         if self.doProfile:
@@ -213,7 +213,7 @@ class ACO:
 
         return False
 
-    def plotLengthByStep(self):
+    def plot_lengthby_step(self):
         title = r'$\bf{%sAS}$, $Ratio_{explored} =' %self.name
         title += r'\frac{%g\cdot10^{3}\/\it{tours}}' % (self.nStep * self.nAnts * .001)
 
@@ -266,7 +266,7 @@ class ACO:
         ratio = (ax.get_ylim()[1] - ax.get_ylim()[0]) / (ax.get_xlim()[1] - ax.get_xlim()[0])
         ax.set_aspect(.5/ratio)
 
-    def initProfiler(self):
+    def init_profiler(self):
         self.pstats = __import__('pstats')
         self.cProfile = __import__('cProfile')
 
@@ -274,12 +274,12 @@ class ACO:
         log (f'profile x {self.nProfile}')
         self.profiler.enable()
 
-    def closeProfiler(self):
+    def close_profiler(self):
         self.profiler.disable()
         stats = self.pstats.Stats(self.profiler).sort_stats('cumtime')
         stats.print_stats(.5) # percent of all profiled functions
 
-    def initPlot(self):
+    def init_plot(self):
         # layout
         self.fig = plt.figure('ACO', figsize=(15, 5))
         self.gs = gridspec.GridSpec(1, 2, width_ratios=[1, 1.5], left=.025, right=.975, top=.85)
@@ -298,11 +298,11 @@ class ACO:
 
         # plot best path
         plt.subplot(self.gs[0])
-        self.graph.plotTour(self.bestGlobalTour)
+        self.graph.plot_tour(self.bestGlobalTour)
 
         # plot best length per step
         plt.subplot(self.gs[1])
-        self.plotLengthByStep()
+        self.plot_lengthby_step()
 
         # draw & wait key
         log ('hit a key (Esc to exit)')
@@ -316,19 +316,19 @@ class ACO:
 class Elitist(ACO):
     name = 'Elitist'
 
-    def addPheroThisStep(self, bestTour, step):
+    def add_phero_this_step(self, bestTour, step):
         # all ants add phero on their tour
         for tour in self.tours:
-            tour.addPhero(self.tau)
+            tour.add_phero(self.tau)
 
         # best global tour add phero
-        self.bestGlobalTour.addPhero(self.tau)
+        self.bestGlobalTour.add_phero(self.tau)
 
 # Rank AS strategy
 class Rank(ACO):
     name = 'Rank'
 
-    def addPheroThisStep(self, bestTour, step):
+    def add_phero_this_step(self, bestTour, step):
         tours = self.tours
 
         # sort tours in length order
@@ -339,19 +339,19 @@ class Rank(ACO):
 
         # the better the rank, the more the ant add phero
         for i in range(keep):
-            tours[i].addPhero(self.tau * (keep - i))
+            tours[i].add_phero(self.tau * (keep - i))
 
 # MaxMin AS strategy
 class MaxMin(ACO):
     name = 'MaxMin'
 
-    def addPheroThisStep(self, bestTour, step):
+    def add_phero_this_step(self, bestTour, step):
         # choose either local or global best tour depending on the completion
         completion = (step + 1.) / self.nStep
         tourChosen = bestTour if completion <= .75 else self.bestGlobalTour
 
         # add phero on the chosen best tour
-        tourChosen.addPhero(self.tau)
+        tourChosen.add_phero(self.tau)
 
         # clamp  phero on the chosen best tour
         maxPhero = self.tau / ((1. - self.rho) * tourChosen.length)

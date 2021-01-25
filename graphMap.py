@@ -60,7 +60,7 @@ class GraphMAP(Graph):
 
         super(GraphMAP, self).__init__(nNodes)
 
-    def getNames(self):
+    def get_namess(self):
         self.pname = f'Map({self.address})' # for print
         self.name = r'Map_{%s}\/'%(self.address.replace(' ', r'\/')) # for matplotlib
 
@@ -69,7 +69,7 @@ class GraphMAP(Graph):
         self.fname += f'{self.ntype.capitalize()}, {self.seed}, {self.nNodes}'
 
     # get mat distance
-    def getMatDist(self):
+    def get_mat_dist(self):
         ox = self.ox
 
         # cache dists & routes on disk
@@ -118,7 +118,7 @@ class GraphMAP(Graph):
         return matDist
 
     # plot a tour
-    def plotTour(self, tour):
+    def plot_tour(self, tour):
         ox = self.ox
         ax, _ = plt.gca(), plt.gcf()
 
@@ -158,9 +158,9 @@ class GraphMAP(Graph):
             ax.annotate(f'{i}', (x, y), c = 'w', size = 7, va = 'center', ha = 'center')
 
         if self.folium:
-            self.plotFolium(tour, routes, ixy, percent)
+            self.plot_folium(tour, routes, ixy, percent)
 
-    def plotFolium(self, tour, routes, ixy, percent):
+    def plot_folium(self, tour, routes, ixy, percent):
         ox = self.ox
 
         gmap = ox.plot_graph_folium(self.G, popup_attribute='name', weight=.5, color = 'blue')

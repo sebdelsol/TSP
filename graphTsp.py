@@ -39,7 +39,8 @@ class GraphTSP(GraphXY):
         if self.opt:
             toindex = dict((n, i) for i, n in enumerate(self.tsp.get_nodes()))
             path = [toindex[n] for n in self.opt.tours[0]]
-            path = np.array(path + [path[0]]) # back to start
+            path.append(path[0]) # back to start
+            path = np.array(path) 
 
             length = self.tsp.trace_tours(self.opt.tours)[0]
 

@@ -40,7 +40,7 @@ class GraphTSP(GraphXY):
             toindex = dict((n, i) for i, n in enumerate(self.tsp.get_nodes()))
             path = [toindex[n] for n in self.opt.tours[0]]
             path.append(path[0]) # back to start
-            path = np.array(path) 
+            path = np.array(path)
 
             length = self.tsp.trace_tours(self.opt.tours)[0]
 
@@ -87,9 +87,8 @@ class GraphTSP(GraphXY):
                 log (f"{name} loaded {'with' if opt else 'without'} optimal tour")
                 return tsp, opt, tsp.dimension
 
-            else:
-                errors = ' & '.join((f'{what}' for what, test in needs.items() if test is False))
-                log (f'{name} INVALID, should be {errors}')
+            errors = ' & '.join((f'{what}' for what, test in needs.items() if test is False))
+            log (f'{name} INVALID, should be {errors}')
 
         else:
             log (f'{name} NOT available')
@@ -105,7 +104,7 @@ class GraphTSP(GraphXY):
         if GraphTSP.create_tsp_dir():
             GraphTSP.download_tsp()
 
-        # file to store the 'state' of tspdir to trck its change
+        # file to store the 'state' of tspdir to track its change
         tspchgfile = os.path.join(tspdir, f'{tspdir}.tspchg')
 
         # get a list of (filename, modified time, size) in tspdir in nonrecursive way
@@ -128,6 +127,7 @@ class GraphTSP(GraphXY):
         # check for change in tspdir
         if tspchg != newTspchg:
             forceupdate = True
+
             with open(tspchgfile, 'wb') as f:
                 pickle.dump(newTspchg, f)
 
@@ -194,4 +194,4 @@ class GraphTSP(GraphXY):
 if __name__ == '__main__':
     GraphTSP.create_tsp_dir()
     GraphTSP.download_tsp()
-    GraphTSP.get_all_valid_tsp()
+    GraphTSP.get_all_valid_tsp(True)

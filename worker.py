@@ -50,7 +50,7 @@ class Worker:
         # sharedMatDist, sharedMatWeight and sharedPaths are shared in memory by all processes
         Worker.MatDist = sharedMatDist.get()       # read only
         Worker.MatWeight = sharedMatWeight.get()   # read only
-        Worker.Paths = sharedPaths.get()           # write only, rows update in parallel
+        Worker.Paths = sharedPaths.get()           # write only, rows updated in parallel
 
     @staticmethod
     def ant_do_tour(ant, start, q):

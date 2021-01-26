@@ -11,6 +11,7 @@ import numpy as np
 
 # only for the Workers processes !!
 class SharedMatWorker:
+
     def __init__(self, sharedMatrix):
         # copy a SharedMatMain
         self.shape = sharedMatrix.shape
@@ -24,6 +25,7 @@ class SharedMatWorker:
 
 # only for the Main process !!
 class SharedMatMain:
+
     def __init__(self, shape, dtype):
         n, m = self.shape = shape
         self.dtype = dtype
@@ -39,6 +41,7 @@ class SharedMatMain:
     def update(self, mat):
         # we can update the mat in the main process only
         np.copyto(self.mat, mat, casting='no')
+
 
 class Worker:
 

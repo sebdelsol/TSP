@@ -168,7 +168,7 @@ class ACO:
             self.do_step(step)
 
             if termination and self.nStagnations >= nStep // 10 :
-                log (f'termination @ {step} steps')
+                log (f'termination at {step} steps')
                 self.nStep = step + 1
                 break
         else:
@@ -290,7 +290,7 @@ class ACO:
         # keep y / x ratio to .5
         ratio = (ax.get_ylim()[1] - ax.get_ylim()[0]) / (ax.get_xlim()[1] - ax.get_xlim()[0])
         ax.set_aspect(.5/ratio)
-        
+
 
 # Elitist AS strategy
 class Elitist(ACO):

@@ -158,7 +158,7 @@ class GraphMAP(Graph):
         nodes = (self.G.nodes[self.nodeids[nodeid]] for nodeid in tour.path[:-1])
         # or in graph order
         # nodes = (self.G.nodes[nodeid] for nodeid in self.nodeids)
-        
+
         ixy = [(i+1, node['x'], node['y']) for i, node in enumerate(nodes)]
 
         for i, x, y in ixy:

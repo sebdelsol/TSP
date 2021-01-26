@@ -60,7 +60,7 @@ class GraphMAP(Graph):
 
         super(GraphMAP, self).__init__(nNodes)
 
-    def get_namess(self):
+    def get_names(self):
         self.pname = f'Map({self.address})' # for print
         self.name = r'Map_{%s}\/'%(self.address.replace(' ', r'\/')) # for matplotlib
 

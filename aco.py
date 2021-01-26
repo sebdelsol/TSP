@@ -191,6 +191,53 @@ class ACO:
 
         return False
 
+    def init_profiler(self):
+        cProfile = __import__('cProfile')
+
+        self.profiler = cProfile.Profile()
+        log (f'profile x {self.nProfile}')
+        self.profiler.enable()
+
+    def close_profiler(self):
+        self.profiler.disable()
+
+        pstats = __import__('pstats')
+        stats = pstats.Stats(self.profiler).sort_stats('cumtime')
+        stats.print_stats(.5) # percent of all profiled functions
+
+    def init_plot(self):
+        # layout
+        self.fig = plt.figure('ACO', figsize=(15, 5))
+        self.gs = gridspec.GridSpec(1, 2, width_ratios=[1, 1.5], left=.025, right=.975, top=.85)
+
+        # callback to catch hit keys on the figure window
+        self.key = None
+        self.fig.canvas.mpl_connect('key_press_event', self.press)
+
+    # called when a key is pressed on the figure
+    def press(self, event):
+        self.key = event.key
+
+    def plot(self):
+        log (f'plot, found = {self.bestGlobalTour.length}km')
+        plt.clf()
+
+        # plot best path
+        plt.subplot(self.gs[0])
+        self.graph.plot_tour(self.bestGlobalTour)
+
+        # plot best length per step
+        plt.subplot(self.gs[1])
+        self.plot_length_by_step()
+
+        # draw & wait key
+        log ('hit a key (Esc to exit)')
+        plt.draw()
+        plt.waitforbuttonpress()
+
+        # Esc key means exit
+        return self.key != 'escape'
+
     def plot_length_by_step(self):
         title = r'$\bf{%sAS}$, $Ratio_{explored} =' %self.name
         title += r'\frac{%g\cdot10^{3}\/\it{tours}}' % (self.nStep * self.nAnts * .001)
@@ -243,53 +290,7 @@ class ACO:
         # keep y / x ratio to .5
         ratio = (ax.get_ylim()[1] - ax.get_ylim()[0]) / (ax.get_xlim()[1] - ax.get_xlim()[0])
         ax.set_aspect(.5/ratio)
-
-    def init_profiler(self):
-        cProfile = __import__('cProfile')
-
-        self.profiler = cProfile.Profile()
-        log (f'profile x {self.nProfile}')
-        self.profiler.enable()
-
-    def close_profiler(self):
-        self.profiler.disable()
-
-        pstats = __import__('pstats')
-        stats = pstats.Stats(self.profiler).sort_stats('cumtime')
-        stats.print_stats(.5) # percent of all profiled functions
-
-    def init_plot(self):
-        # layout
-        self.fig = plt.figure('ACO', figsize=(15, 5))
-        self.gs = gridspec.GridSpec(1, 2, width_ratios=[1, 1.5], left=.025, right=.975, top=.85)
-
-        # callback to catch hit keys on the figure window
-        self.key = None
-        self.fig.canvas.mpl_connect('key_press_event', self.press)
-
-    # called when a key is pressed on the figure
-    def press(self, event):
-        self.key = event.key
-
-    def plot(self):
-        log (f'plot, found = {self.bestGlobalTour.length}km')
-        plt.clf()
-
-        # plot best path
-        plt.subplot(self.gs[0])
-        self.graph.plot_tour(self.bestGlobalTour)
-
-        # plot best length per step
-        plt.subplot(self.gs[1])
-        self.plot_length_by_step()
-
-        # draw & wait key
-        log ('hit a key (Esc to exit)')
-        plt.draw()
-        plt.waitforbuttonpress()
-
-        # Esc key means exit
-        return self.key != 'escape'
+        
 
 # Elitist AS strategy
 class Elitist(ACO):

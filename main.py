@@ -54,7 +54,7 @@ if __name__ == '__main__':
     elif gclsname == 'GraphMAP':
         gkwargs = dict(nNodes     = 50,
                        seed       = 1000,
-                       address    = 'Nimes, France',
+                       address    = 'Montpellier, France',
                        radius     = 1500,
                        ntype      = 'drive',
                        footprints = True,

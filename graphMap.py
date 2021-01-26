@@ -46,7 +46,10 @@ class GraphMAP(Graph):
             self.G = ox.load_graphml(Gfile)
 
         else:
-            self.G = ox.graph_from_address(address, dist=radius, network_type=ntype)
+            G = ox.graph_from_address(address, dist=radius, network_type=ntype)
+            # nee nodes that are all connected pairwise
+            self.G = ox.utils_graph.get_largest_component(G, strongly=True)
+
             # works only with plot_route_folium, not plot_graph_routes
             # self.G = self.G.to_undirected().to_directed()
             ox.save_graphml(self.G, Gfile)
@@ -104,10 +107,12 @@ class GraphMAP(Graph):
             for i in range(self.nNodes):
                 for j in range(i + 1, self.nNodes):
                     src, dst = nodeids[i], nodeids[j]
+
                     route = ox.shortest_path(self.G, src, dst, weight=weight)
+                    self.routes[i][j] = self.routes[j][i] = route # symmetry !
+
                     weights = ox.utils_graph.get_route_edge_attributes(self.G, route, weight)
                     matDist[i][j] = sum(weights) * .001 # in km
-                    self.routes[i][j] = self.routes[j][i] = route # symmetry !
 
             # symmetry
             matDist += matDist.T
@@ -142,7 +147,7 @@ class GraphMAP(Graph):
                                        color = 'orange', alpha=0.3)
 
         _, ax = ox.plot_graph(self.G, show=False, close=False, ax=ax,
-                              edge_color='red', edge_linewidth=0.5, edge_alpha =.8, node_size=0)
+                              edge_color='red', edge_linewidth=0.25, edge_alpha =.9, node_size=0)
 
         routes = [self.routes[i][j] for i, j in zip(tour.path[:-1], tour.path[1:])]
         _, ax = ox.plot_graph_routes(self.G, routes, route_colors=self.colors,
@@ -150,10 +155,12 @@ class GraphMAP(Graph):
                                      orig_dest_size=80, route_linewidth=1, route_alpha=1)
 
         # label on nodes, in path order
-        nodes = [self.G.nodes[self.nodeids[nodeid]] for nodeid in tour.path[:-1]]
+        nodes = (self.G.nodes[self.nodeids[nodeid]] for nodeid in tour.path[:-1])
+        # or in graph order
+        # nodes = (self.G.nodes[nodeid] for nodeid in self.nodeids)
+        
         ixy = [(i+1, node['x'], node['y']) for i, node in enumerate(nodes)]
-        # in graph order
-        #ixy = [(i+1, node['x'], node['y']) for i, node in enumerate(nodes)]
+
         for i, x, y in ixy:
             ax.annotate(f'{i}', (x, y), c = 'w', size = 7, va = 'center', ha = 'center')
 

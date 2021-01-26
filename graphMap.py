@@ -14,7 +14,7 @@ class GraphMAP(Graph):
 
     cachedir = 'cache'
 
-    def __init__(self, nNodes = 50, seed = 1000, address = 'Nimes, France',
+    def __init__(self, nNodes = 50, seed = 1000, address = 'Montpellier, France',
                  radius = 1500, ntype = 'drive', footprints = True, folium = False):
 
         # imports only when the class is intancied

@@ -35,7 +35,7 @@ if __name__ == '__main__':
     # [0] = GraphRND
     # [1] = GraphTSP
     # [2] = GraphMAP
-    GraphCls = GraphClasses[1]
+    GraphCls = GraphClasses[0]
     gclsname = GraphCls.__name__
 
     if gclsname == 'GraphRND':
@@ -69,6 +69,7 @@ if __name__ == '__main__':
         acoCls = AcoClasses[2]
 
         acokwargs = dict(nAnts        = graph.nNodes,
+                         opt2         = False,
                          doPlot       = True,
                          multiprocess = True,
                          nProfile     = 0)

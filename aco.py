@@ -18,7 +18,7 @@ class ACO:
 
     name = 'ACO'
 
-    def __init__(self, graph, nAnts = 10 , doPlot = True, multiprocess = True, nProfile = 0):
+    def __init__(self, graph, nAnts = 10 , opt2=False, doPlot = True, multiprocess = True, nProfile = 0):
         # reset seed to have 'true' random
         random.seed()
         np.random.seed()
@@ -46,7 +46,7 @@ class ACO:
         createPool = Pool if multiprocess else DummyPool
 
         # create a pool of processes of workers
-        args = (nNodes, log,
+        args = (nNodes, log, opt2,
                 SharedMatWorker(graph.sharedMatDist),
                 SharedMatWorker(graph.sharedMatWeight),
                 SharedMatWorker(sharedPaths))
@@ -129,7 +129,7 @@ class ACO:
 
     def simulate(self, nStep=200, alpha=1.0,
                  beta=3.0, rho=.1, tau=1.0, q=.6,
-                 nAvg=10, termination = True):
+                 nAvg=10, termination=True):
 
         log (f'simulate {nStep} steps')
 

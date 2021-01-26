@@ -45,8 +45,9 @@ def print_defaults(txt, func, override = None):
     key_val = get_defaults(func)
 
     if override is not None:
-        key_val = [(k, override.get(k, v)) for k, v in key_val]
+        key_val = ((k, override.get(k, v)) for k, v in key_val)
 
+    key_val = list(key_val)
     width = max(len(k) for k, v in key_val)
     args = (f'{k}'.ljust(width) + f' = {v}' for k, v in key_val)
 
@@ -58,7 +59,7 @@ def print_defaults(txt, func, override = None):
 def copy_paste_helper():
     log ('TO COPY PASTE !')
     tab ('# generated with mainhelper.py')
-    tab ('from mainHelper import GraphClasses, TspOpts, AcoClasses')
+    tab ('from mainhelper import GraphClasses, TspOpts, AcoClasses')
     print ()
     for i, gtype in enumerate(GraphClasses):
         tab (f'# [{i}] = {gtype.__name__}')

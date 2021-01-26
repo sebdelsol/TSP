@@ -46,9 +46,10 @@ class SharedMatMain:
 class Worker:
 
     @staticmethod
-    def init(nNodes, log, sharedMatDist, sharedMatWeight, sharedPaths):
+    def init(nNodes, log, opt2, sharedMatDist, sharedMatWeight, sharedPaths):
         Worker.nNodes = nNodes
         Worker.log = log
+        Worker.opt2 = opt2
 
         # sharedMatDist, sharedMatWeight and sharedPaths are shared in memory by all processes
         Worker.MatDist = sharedMatDist.get()       # read only
@@ -113,8 +114,28 @@ class Worker:
         # back to the start
         path[-1] = start
 
-        # path length rounded with 2 digits, since equivalent paths (by rotation or inversion)
-        # might have slightly different lengths due to the sum imprecision
         # rows = (array 'from nodes'), columns = (array 'to nodes') of the path
         rows, cols = path[:-1], path[1:]
-        return round(Worker.MatDist[rows, cols].sum(), 2)
+        length = Worker.MatDist[rows, cols].sum()
+
+        # 2-opt permutations to find a better path
+        # optims for symmetric path
+        if Worker.opt2:
+            dist = Worker.MatDist
+
+            for i in range(1, nNodes):
+                for j in range(i + 1, nNodes):
+
+                    pi, pj, piprev, pjnext = path[i], path[j], path[i-1], path[j+1]
+                    gain = dist[pi][pjnext] + dist[piprev][pj] - dist[piprev][pi] - dist[pj][pjnext]
+
+                    if gain < 0:
+                        # invert i,j and everything in between
+                        path[i:j+1] = path[j:i-1:-1]
+
+                        # add the gain
+                        length += gain
+
+        # path length rounded with 2 digits, since equivalent paths (by rotation or inversion)
+        # might have slightly different lengths due to the sum imprecision
+        return round(length, 2)

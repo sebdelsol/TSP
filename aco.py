@@ -4,33 +4,14 @@
 import random
 
 from multiprocessing import Pool
+from multiprocessing.dummy import Pool as DummyPool
 from matplotlib import pyplot as plt
 from matplotlib import gridspec
 import numpy as np
 
 from log import log
 from graph import Tour
-from worker import WorkerInit, WorkerAntDoTour, WorkerForceCreation, SharedMatMain, SharedMatWorker
-
-# emulate mutiprocess.Pool for mono process debug
-class MonoDummyPool:
-
-    _processes = 1
-
-    def __init__(self, initargs = None, initializer = None):
-        initializer(*initargs)
-
-    def map(self, func, args, _):
-        return (func(args) for args in args)
-
-    def starmap(self, func, args, _):
-        return (func(*args) for args in args)
-
-    def close(self):
-        pass
-
-    def join(self):
-        pass
+from worker import Worker, SharedMatMain, SharedMatWorker
 
 # Ant Colony Optimization class for simulation
 class ACO:
@@ -62,27 +43,24 @@ class ACO:
         Tour.init_graph(graph) # class attribute of Tour
 
         # if not multiprocess use MonoDummyPool as a mono processor pool for debug
-        createPool = Pool if multiprocess else MonoDummyPool
+        createPool = Pool if multiprocess else DummyPool
 
         # create a pool of processes of workers
         args = (nNodes, log,
                 SharedMatWorker(graph.sharedMatDist),
                 SharedMatWorker(graph.sharedMatWeight),
                 SharedMatWorker(sharedPaths))
-        self.pool = createPool(initializer = WorkerInit, initargs = args)
+        self.pool = createPool(initializer = Worker.init, initargs = args)
         nProcess = self.pool._processes
 
         # best chunksize to avoid process call overhead
         # we want the bigger possible remaining chunksize when nAnts % nProcess != 0
         self.chunksize = nAnts // nProcess + (1 if nAnts % nProcess > 0 else 0)
 
-        # force early creation of all processes
-        # needed on Windows to avoid a late process creation that lenghten the first simulate
-        self.pool.map(WorkerForceCreation, range(nProcess))
-
         log (f'aco {self.name} created')
         log (f'{nAnts} ants created')
-        log (f"run on {nProcess} worker processe{'s' if nProcess > 1 else ''}")
+        n_log_process = nProcess if multiprocess else 0
+        log (f"run on {n_log_process} worker process{'es' if n_log_process > 1 else ''}")
         log (f'each process handles {self.chunksize} tours')
 
         # plotting & profiling
@@ -115,7 +93,7 @@ class ACO:
         self.graph.compute_weights(self.alpha)
 
         # do a tour for each ant, use the workers poll
-        lengths = self.pool.starmap(WorkerAntDoTour, self.ants, self.chunksize)
+        lengths = self.pool.starmap(Worker.ant_do_tour, self.ants, self.chunksize)
 
         # update the tours with the new paths & lengths
         for tour, path, length in zip(self.tours, self.paths, lengths):
@@ -267,16 +245,17 @@ class ACO:
         ax.set_aspect(.5/ratio)
 
     def init_profiler(self):
-        self.pstats = __import__('pstats')
-        self.cProfile = __import__('cProfile')
+        cProfile = __import__('cProfile')
 
-        self.profiler = self.cProfile.Profile()
+        self.profiler = cProfile.Profile()
         log (f'profile x {self.nProfile}')
         self.profiler.enable()
 
     def close_profiler(self):
         self.profiler.disable()
-        stats = self.pstats.Stats(self.profiler).sort_stats('cumtime')
+
+        pstats = __import__('pstats')
+        stats = pstats.Stats(self.profiler).sort_stats('cumtime')
         stats.print_stats(.5) # percent of all profiled functions
 
     def init_plot(self):

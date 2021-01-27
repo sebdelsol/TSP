@@ -118,23 +118,35 @@ class Worker:
         rows, cols = path[:-1], path[1:]
         length = Worker.MatDist[rows, cols].sum()
 
-        # 2-opt permutations to find a better path
-        # optims for symmetric path
+        
+        # apply the best 2-opt swap found
         if Worker.opt2:
             dist = Worker.MatDist
 
-            for i in range(1, nNodes):
-                for j in range(i + 1, nNodes):
+            minchange = 0
 
-                    pi, pj, piprev, pjnext = path[i], path[j], path[i-1], path[j+1]
-                    gain = dist[pi][pjnext] + dist[piprev][pj] - dist[piprev][pi] - dist[pj][pjnext]
+            # start should not be swapped
+            for i in range(nNodes - 2):
+                ip, i1p = path[i: i+2] # (i, i+1)
+                dist_ip_i1p = dist[ip][i1p]
 
-                    if gain < 0:
-                        # invert i,j and everything in between
-                        path[i:j+1] = path[j:i-1:-1]
+                # do no swap adjacent edges
+                for j in range(i + 2, nNodes):
+                    jp, j1p = path[j : j+2] # (j, j+1)
 
-                        # add the gain
-                        length += gain
+                    # change for symmetric TSP !
+                    # swap edge (i, i+1) -> (i, j) and (j, j+1) -> (i+1, j+1)
+                    change = dist[ip][jp] + dist[i1p][j1p] - dist_ip_i1p - dist[jp][j1p]
+
+                    if change < minchange:
+                        minchange = change
+                        mini, minj = i, j
+
+            if minchange < 0:
+                # swap the edges ont the path: swap nodes mini+1, minj and everything in between
+                path[mini+1:minj+1] = path[minj:mini:-1]
+                length += minchange
+
 
         # path length rounded with 2 digits, since equivalent paths (by rotation or inversion)
         # might have slightly different lengths due to the sum imprecision

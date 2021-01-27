@@ -118,7 +118,7 @@ class Worker:
         rows, cols = path[:-1], path[1:]
         length = Worker.MatDist[rows, cols].sum()
 
-        
+
         # apply the best 2-opt swap found
         if Worker.opt2:
             dist = Worker.MatDist

@@ -18,7 +18,7 @@ class ACO:
 
     name = 'ACO'
 
-    def __init__(self, graph, nAnts = 10 , opt2=False, doPlot = True, multiprocess = True, nProfile = 0):
+    def __init__(self, graph, nAnts=10, opt2=False, doPlot=True, multiprocess=True, nProfile=0):
         # reset seed to have 'true' random
         random.seed()
         np.random.seed()
